@@ -1,0 +1,10 @@
+# Device-side scripts and recipes are consumed on Linux/OHOS: force LF so a
+# Windows checkout does not produce CRLF files that /system/bin/sh rejects.
+*.sh            text eol=lf
+*.py            text eol=lf
+*.yml           text eol=lf
+device/*        text eol=lf
+recipes/*       text eol=lf
+scripts/*       text eol=lf
+*.rb            text eol=lf
+*.md            text eol=lf
