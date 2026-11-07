@@ -1,0 +1,46 @@
+#!/system/bin/sh
+# hbrew-farm-watch v6 — keep brewed COMMANDS visible on /system/bin.
+#
+# Publication model: individual symlinks, commands only.
+#   /system/bin/<cmd> -> /data/harmonybrew/bin/<cmd>
+#
+# Libraries are NEVER published (see hbrew-systemlink v2 header): a brewed
+# lib on /system/lib64 shadows the image's own copies for every process and
+# hangs the device on the boot animation.
+#
+# Loop: regenerate farms, then republish only when the keg bin listing
+# changed (avoids a remount-rw cycle every second).
+
+P=/data/harmonybrew
+SLEEP="$P/bin/busybox"
+[ -x "$SLEEP" ] || SLEEP=sleep
+STAMP="$P/var/systemlink/.last-bins"
+
+mkdir -p "$P/var/systemlink" 2>/dev/null
+
+listing() { ls "$P/bin" 2>/dev/null; }
+
+# one-shot cleanup of harmful leftovers from earlier versions
+if [ -e /usr/local/lib ] || [ -L /usr/local/lib ]; then
+  if mount -o remount,rw / 2>/dev/null; then
+    rm -rf /usr/local/lib && sync
+    mount -o remount,ro / 2>/dev/null
+  fi
+fi
+
+listing > "$STAMP" 2>/dev/null
+
+while :; do
+  "$P/sbin/hbrew-farm" >/dev/null 2>&1
+  cur="$P/var/systemlink/.cur-bins"
+  listing > "$cur" 2>/dev/null
+  if ! cmp -s "$cur" "$STAMP" 2>/dev/null; then
+    if mount -o remount,rw / 2>/dev/null; then
+      "$P/sbin/hbrew-systemlink" >/dev/null 2>&1
+      sync
+      mount -o remount,ro / 2>/dev/null
+    fi
+    mv -f "$cur" "$STAMP" 2>/dev/null
+  fi
+  "$SLEEP" sleep 1 >/dev/null 2>&1 || sleep 2
+done

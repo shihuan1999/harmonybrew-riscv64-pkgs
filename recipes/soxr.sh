@@ -1,0 +1,6 @@
+NAME="soxr"
+VERSION="0.1.3"
+URL="https://github.com/chirlu/soxr/archive/refs/tags/0.1.3.tar.gz"
+DESC="SoX Resampler: high quality sample rate conversion"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF -DWITH_OPENMP=OFF"

@@ -1,0 +1,6 @@
+NAME="brotli"
+VERSION="1.1.0"
+URL="https"
+DESC="//github.com/google/brotli/archive/refs/tags/v1.1.0.tar.gz"
+HOMEPAGE="https://example.org/brotli"
+BUILD_METHOD="Brotli compression:cmake"

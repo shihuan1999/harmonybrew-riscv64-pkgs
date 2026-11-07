@@ -1,0 +1,6 @@
+NAME="highway"
+VERSION="1.2.0"
+URL="https://github.com/google/highway/archive/refs/tags/1.2.0.tar.gz"
+DESC="Google Highway: portable SIMD/vectorization library"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DHWY_ENABLE_TESTS=OFF -DHWY_ENABLE_EXAMPLES=OFF -DBUILD_SHARED_LIBS=OFF"

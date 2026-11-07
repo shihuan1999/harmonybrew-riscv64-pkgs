@@ -1,0 +1,7 @@
+NAME="glm"
+VERSION="1.0.1"
+URL="https://github.com/g-truc/glm/archive/refs/tags/1.0.1.tar.gz"
+DESC="GLM: header-only C++ math library for graphics/geometry"
+HOMEPAGE="https://github.com/g-truc/glm"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DGLM_BUILD_TESTS=OFF -DGLM_BUILD_LIBRARY=OFF"

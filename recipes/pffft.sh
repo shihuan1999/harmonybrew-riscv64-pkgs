@@ -1,0 +1,8 @@
+NAME="pffft"
+VERSION="1.0"
+URL="https://github.com/marton78/pffft/archive/refs/heads/master.tar.gz"
+SHA256="__SHA__"
+DESC="PFFFT: pretty fast FFT (SIMD-friendly, small footprint)"
+HOMEPAGE="https://github.com/marton78/pffft"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DPFFFT_STATIC=ON -DPFFFT_SHARED=OFF"

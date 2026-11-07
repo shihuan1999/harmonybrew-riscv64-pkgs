@@ -1,0 +1,6 @@
+NAME="samplerate"
+VERSION="0.2.2"
+URL="https://github.com/libsndfile/libsamplerate/archive/refs/tags/0.2.2.tar.gz"
+DESC="libsamplerate: audio sample rate converter"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF"

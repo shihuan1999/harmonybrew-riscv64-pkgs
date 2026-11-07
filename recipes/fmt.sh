@@ -1,0 +1,8 @@
+NAME="fmt"
+VERSION="11.0.2"
+URL="https://github.com/fmtlib/fmt/archive/refs/tags/11.0.2.tar.gz"
+SHA256="6cb1e6d37bdcb756dbbe59be438790db409cdb4868c66e888d5df9f13f7c027f"
+DESC="Modern C++ formatting library (used across scientific stacks)"
+HOMEPAGE="https://fmt.dev/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DFMT_TEST=OFF -DFMT_DOC=OFF -DBUILD_SHARED_LIBS=OFF"

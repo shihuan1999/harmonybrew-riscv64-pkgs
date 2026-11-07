@@ -1,0 +1,7 @@
+NAME="gmp"
+VERSION="6.3.0"
+URL="https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz"
+DESC="GNU MP: arbitrary precision arithmetic"
+HOMEPAGE="https://gmplib.org/"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--disable-shared --enable-static --disable-assembly"

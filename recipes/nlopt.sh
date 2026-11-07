@@ -1,0 +1,6 @@
+NAME="nlopt"
+VERSION="2.8.0"
+URL="https://github.com/stevengj/nlopt/archive/refs/tags/v2.8.0.tar.gz"
+DESC="NLopt: nonlinear optimization library (many algorithms)"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DNLOPT_TESTS=OFF -DNLOPT_PYTHON=OFF -DNLOPT_OCTAVE=OFF -DNLOPT_MATLAB=OFF -DNLOPT_GUILE=OFF -DNLOPT_SWIG=OFF"

@@ -1,0 +1,7 @@
+NAME="spectra"
+VERSION="1.0.1"
+URL="https://github.com/yixuan/spectra/archive/refs/tags/v1.0.1.tar.gz"
+DESC="Spectra: header-only C++ library for large-scale eigenvalue problems"
+DEPS="eigen"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_TESTING=OFF"

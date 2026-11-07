@@ -1,0 +1,7 @@
+NAME="argparse"
+VERSION="3.1"
+URL="https://github.com/p-ranav/argparse/archive/refs/tags/v3.1.tar.gz"
+DESC="argparse: modern C++ command line argument parser"
+HOMEPAGE="https://github.com/p-ranav/argparse"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DARGPARSE_BUILD_TESTS=OFF"

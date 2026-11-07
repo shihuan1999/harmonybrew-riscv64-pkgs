@@ -1,0 +1,6 @@
+NAME="xtl"
+VERSION="0.7.7"
+URL="https://github.com/xtensor-stack/xtl/archive/refs/tags/0.7.7.tar.gz"
+DESC="xtl: basic tools for the xtensor stack"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_TESTS=OFF"

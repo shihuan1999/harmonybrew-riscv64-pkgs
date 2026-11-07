@@ -1,0 +1,7 @@
+NAME="cli11"
+VERSION="2.4.2"
+URL="https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.4.2.tar.gz"
+DESC="CLI11: command line parser for C++ scientific tools"
+HOMEPAGE="https://github.com/CLIUtils/CLI11"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DCLI11_BUILD_TESTS=OFF -DCLI11_BUILD_EXAMPLES=OFF"

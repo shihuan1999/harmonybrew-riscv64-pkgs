@@ -1,0 +1,7 @@
+NAME="umfpack"
+VERSION="6.3.5"
+URL="https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.8.3.tar.gz"
+DESC="UMFPACK: unsymmetric multifrontal sparse LU (from SuiteSparse)"
+DEPS="openblas"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF"

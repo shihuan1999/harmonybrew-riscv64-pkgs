@@ -1,0 +1,6 @@
+NAME="gmpy2-deps"
+VERSION="1.0"
+URL="https://github.com/chezou/gmpy2/archive/refs/heads/master.tar.gz"
+DESC="gmpy2 support bundle (GMP/MPFR/MPC aggregate build)"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF"

@@ -1,0 +1,87 @@
+#!/system/bin/sh
+# hbrew-fix-rpath (device side) — repair build-host rpaths baked into a keg.
+#
+# PROBLEM
+#   Packages built on the compile server carry RPATHs pointing at the *build
+#   staging* directory, e.g.
+#       /home/heshihuan/WorkSpace/harmonybrew-port/out/stage-jq/jq/1.8.1/lib
+#   That path does not exist on the device, so such a binary cannot find its
+#   own libraries ("Error loading shared library libjq.so.1") even though the
+#   .so sits right next to it in the keg.
+#
+# FIX (no patchelf needed)
+#   Use the on-device LLVM toolchain's linker to re-emit the program with the
+#   canonical runpath. RPATH is a link-time property, so re-linking is the
+#   portable way to change it without patchelf.
+#
+#   For a PIE/executable this tool:
+#     1. links a fresh stub with the desired runpath,
+#     2. copies the stub's PT_DYNAMIC/DT_RUNPATH string area?  -> no.
+#   Simpler and fully reliable for our cases: wrap the binary.
+#     <keg>/bin/<name>          (original, renamed to <name>.real)
+#     <keg>/bin/<name>          shell wrapper that execs <name>.real with
+#                               LD_LIBRARY_PATH pointing at the keg lib dir
+#   This is deterministic, needs no ELF surgery, and keeps `brew uninstall`
+#   semantics intact (both files live in the keg).
+#
+# USAGE
+#   hbrew-fix-rpath <keg-dir> [--check]
+#     keg-dir e.g. /data/harmonybrew/Cellar/jq/1.8.1
+
+PREFIX=/data/harmonybrew
+READELF=/data/hap-dev/toolchain/llvm/bin/llvm-readelf
+CHECK=0
+for a in "$@"; do
+  case "$a" in
+    --check) CHECK=1 ;;
+    *) KEG="$a" ;;
+  esac
+done
+[ -n "${KEG:-}" ] || { echo "usage: hbrew-fix-rpath <keg-dir> [--check]" >&2; exit 2; }
+[ -d "$KEG" ] || { echo "not a directory: $KEG" >&2; exit 2; }
+
+[ -x "$READELF" ] || READELF=readelf
+
+fixed=0; bad=0; skipped=0
+
+for f in "$KEG"/bin/*; do
+  [ -f "$f" ] || continue
+  case "$f" in *.real|*.rpath-bak) continue ;; esac
+  # skip wrappers we already wrote
+  head -c 2 "$f" 2>/dev/null | grep -q '#!' && continue
+
+  info="$("$READELF" -d "$f" 2>/dev/null | grep -E 'RPATH|RUNPATH')" || continue
+  [ -n "$info" ] || continue
+  cur="$(printf '%s' "$info" | sed -n 's/.*Library r\(un\)\{0,1\}path: \[\(.*\)\]/\2/p')"
+  case "$cur" in
+    "$PREFIX"*) continue ;;                 # already fine
+  esac
+  bad=$((bad + 1))
+  if [ "$CHECK" = 1 ]; then
+    echo "BAD RPATH: $f"
+    echo "           -> $cur"
+    continue
+  fi
+
+  libdir="$KEG/lib"
+  base="${f##*/}"
+  # keep a stable, keg-local wrapper
+  if [ ! -e "$f.real" ]; then
+    mv "$f" "$f.real" || { skipped=$((skipped+1)); continue; }
+  fi
+  cat > "$f" <<EOF
+#!/system/bin/sh
+# rpath repair wrapper (built by hbrew-fix-rpath): the original binary was
+# linked against the build host's staging dir, so point the loader at the
+# keg's own lib directory before exec'ing it.
+LD_LIBRARY_PATH="\$libdir:\${LD_LIBRARY_PATH:-\$LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH
+exec "\$0.real" "\$@"
+EOF
+  chmod 755 "$f"
+  fixed=$((fixed + 1))
+  echo "wrapped: ${f#"$KEG"/}"
+done
+
+echo "hbrew-fix-rpath: fixed=$fixed bad=$bad skipped=$skipped"
+[ "$bad" = 0 ]

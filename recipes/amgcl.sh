@@ -1,0 +1,6 @@
+NAME="amgcl"
+VERSION="1.4.4"
+URL="https://github.com/ddemidov/amgcl/archive/refs/tags/1.4.4.tar.gz"
+DESC="AMGCL: header-only algebraic multigrid solver library"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DAMGCL_BUILD_TESTS=OFF -DAMGCL_BUILD_EXAMPLES=OFF"

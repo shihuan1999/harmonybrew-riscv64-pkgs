@@ -1,0 +1,6 @@
+NAME="xsimd"
+VERSION="13.0.0"
+URL="https://github.com/xtensor-stack/xsimd/archive/refs/tags/13.0.0.tar.gz"
+DESC="xsimd: C++ SIMD intrinsics wrappers"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF"

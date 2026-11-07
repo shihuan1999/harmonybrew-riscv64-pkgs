@@ -1,0 +1,6 @@
+NAME="tinyxml2"
+VERSION="10.0.0"
+URL="https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.tar.gz"
+DESC="TinyXML2: simple XML parser (mesh/config formats)"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -Dtinyxml2_BUILD_TESTING=OFF"

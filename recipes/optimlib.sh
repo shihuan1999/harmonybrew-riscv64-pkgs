@@ -1,0 +1,6 @@
+NAME="optimlib"
+VERSION="1.0"
+URL="https://github.com/kthohr/optim/archive/refs/heads/master.tar.gz"
+DESC="OptimLib: C++ numerical optimization routines (header-only)"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF"

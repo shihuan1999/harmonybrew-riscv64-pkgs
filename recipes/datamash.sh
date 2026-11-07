@@ -1,0 +1,6 @@
+NAME="datamash"
+VERSION="1.8"
+URL="https://ftp.gnu.org/gnu/datamash/datamash-1.8.tar.gz"
+DESC="GNU Datamash: command-line statistics on tabular data"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--disable-nls"

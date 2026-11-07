@@ -1,0 +1,9 @@
+NAME="suitesparse"
+VERSION="7.8.3"
+URL="https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.8.3.tar.gz"
+DESC="SuiteSparse: sparse matrix algorithms (AMD, CHOLMOD, UMFPACK)"
+HOMEPAGE="https://people.engr.tamu.edu/davis/suitesparse.html"
+DEPS="openblas"
+BUILD_METHOD="make"
+MAKE_TARGET=""
+INSTALL_CMD='mkdir -p "$stage/lib" "$stage/include"'

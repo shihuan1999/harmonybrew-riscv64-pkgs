@@ -1,0 +1,8 @@
+NAME="eigen"
+VERSION="3.4.0"
+URL="https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz"
+SHA256="8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+DESC="C++ template library for linear algebra: matrices, vectors, solvers"
+HOMEPAGE="https://eigen.tuxfamily.org/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DEIGEN_BUILD_DOC=OFF -DBUILD_TESTING=OFF"

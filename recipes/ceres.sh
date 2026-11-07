@@ -1,0 +1,7 @@
+NAME="ceres"
+VERSION="2.2.0"
+URL="https://github.com/ceres-solver/ceres-solver/archive/refs/tags/2.2.0.tar.gz"
+DESC="Ceres Solver: nonlinear least squares and optimization"
+DEPS="eigen"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DBUILD_BENCHMARKS=OFF -DUSE_CUDA=OFF"

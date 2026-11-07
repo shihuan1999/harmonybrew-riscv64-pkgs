@@ -1,0 +1,7 @@
+NAME="metis"
+VERSION="5.1.0"
+URL="https://github.com/KarypisLab/METIS/archive/refs/tags/v5.1.0.tar.gz"
+DESC="METIS: graph partitioning for parallel FEM/mesh decomposition"
+HOMEPAGE="http://glaros.dtc.umn.edu/gkhome/metis/metis/overview"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DGKLIB_PATH=."

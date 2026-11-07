@@ -1,0 +1,34 @@
+[1][11:15:17] Not support std mode
+#!/system/bin/sh
+# hbrew-farm v2 ¡ª maintain symlink farms that give every brew-installed
+# command AND shared library a zero-step presence on the system paths:
+#   var/usrlocal     (bin)  -> bind-mounted on /usr/local/bin  (PATH #1)
+#   var/usrlocal-lib (lib)  -> bind-mounted on /usr/local/lib  (musl default search)
+# Absolute targets; 'brew' itself is EXCLUDED from the bin farm so Homebrew
+# does not flip its prefix to /usr/local (brew.sh '/usr/local HOMEBREW_PREFIX').
+# Idempotent and race-benign: safe to run concurrently from brewboot,
+# the polling watcher and hbrew-env.sh.
+
+P=/data/harmonybrew
+regen() {  # regen <src_dir> <farm_dir> <exclude1>[ <exclude2>...]
+  src=$1; farm=$2; shift 2
+  mkdir -p "$farm" 2>/dev/null || return 0
+  for f in "$farm"/* "$farm"/*.*; do
+    [ -e "$f" ] || [ -L "$f" ] || continue
+    b=${f##*/}
+    [ -e "$src/$b" ] || rm -f "$f" 2>/dev/null
+  done
+  for s in "$src"/* "$src"/*.*; do
+    [ -e "$s" ] || [ -L "$s" ] || continue
+    b=${s##*/}
+    skip=0
+    for x in "$@"; do [ "$b" = "$x" ] && skip=1; done
+    [ $skip -eq 1 ] && continue
+    [ -L "$farm/$b" ] && continue
+    ln -s "$s" "$farm/$b" 2>/dev/null
+  done
+}
+
+regen "$P/bin"  "$P/var/usrlocal"     brew
+regen "$P/lib"  "$P/var/usrlocal-lib"
+exit 0

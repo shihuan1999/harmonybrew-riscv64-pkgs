@@ -1,0 +1,61 @@
+name: build-bottles
+
+# Rebuild every recipe on a self-hosted riscv64 OHOS toolchain runner.
+# The default GitHub runners cannot produce riscv64-OHOS binaries (the SpacemiT
+# musl sysroot is required), so this workflow is primarily a *reproducibility
+# record*: it documents the exact steps and runs on a runner that has the
+# toolchain. Set HBREW_TC (or use the default path) on that runner.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "comma separated recipe names (empty = all)"
+        required: false
+        default: ""
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: [self-hosted, linux, riscv-toolchain]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify toolchain
+        run: |
+          set -e
+          TC="${HBREW_TC:-$HOME/WorkSpace/spacemit-toolchain-linux-musl-x86_64-oh-20260630}"
+          test -x "$TC/bin/riscv64-unknown-linux-musl-gcc" || {
+            echo "riscv64-unknown-linux-musl-gcc not found under $TC"; exit 1; }
+          echo "HBREW_TC=$TC" >> "$GITHUB_ENV"
+
+      - name: Fetch sources and pin sha256
+        run: ./scripts/fill-sha256.sh
+
+      - name: Build
+        run: |
+          set -e
+          only="${{ github.event.inputs.only }}"
+          if [ -n "$only" ]; then
+            IFS=',' read -ra list <<< "$only"
+            for n in "${list[@]}"; do ./scripts/build.sh "$n"; done
+          else
+            ./scripts/build.sh --all || true
+          fi
+
+      - name: Summarise
+        run: |
+          echo '### Built bottles' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat out/INDEX.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(none)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bottles
+          path: |
+            out/*.bottle.tar.gz
+            out/*.rb
+            out/INDEX.txt
+          if-no-files-found: warn

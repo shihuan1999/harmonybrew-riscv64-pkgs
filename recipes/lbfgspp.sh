@@ -1,0 +1,7 @@
+NAME="lbfgspp"
+VERSION="0.3.0"
+URL="https://github.com/yixuan/LBFGSpp/archive/refs/tags/v0.3.0.tar.gz"
+DESC="LBFGS++: header-only L-BFGS and L-BFGS-B solvers"
+DEPS="eigen"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_TESTING=OFF"

@@ -1,0 +1,7 @@
+NAME="superlu"
+VERSION="6.0.1"
+URL="https://github.com/xiaoyeli/superlu/archive/refs/tags/v6.0.1.tar.gz"
+DESC="SuperLU: direct solution of large sparse linear systems"
+DEPS="openblas"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-Denable_internal_blaslib=OFF -DTPL_BLAS_LIBRARIES=blas -Denable_tests=OFF -DBUILD_SHARED_LIBS=OFF"

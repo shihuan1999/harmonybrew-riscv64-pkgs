@@ -1,0 +1,6 @@
+NAME="gsl-interp"
+VERSION="2.8"
+URL="https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz"
+DESC="GSL interpolation/statistics extras (alias build of GSL)"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--disable-shared --enable-static"

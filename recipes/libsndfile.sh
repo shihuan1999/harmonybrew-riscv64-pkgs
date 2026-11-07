@@ -1,0 +1,8 @@
+NAME="libsndfile"
+VERSION="1.2.2"
+URL="https://github.com/libsndfile/libsndfile/archive/refs/tags/1.2.2.tar.gz"
+SHA256="ffe12ef8add3eaca876f04087734e6e8e029350082f3251f565fa9da55b52121"
+DESC="Audio file reading/writing (signal processing)"
+HOMEPAGE="https://libsndfile.github.io/libsndfile/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_PROGRAMS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF"

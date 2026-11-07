@@ -1,0 +1,6 @@
+NAME="cjson"
+VERSION="1.7.18"
+URL="https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.18.tar.gz"
+DESC="cJSON: ultralight JSON parser in C"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DENABLE_CJSON_TEST=OFF"

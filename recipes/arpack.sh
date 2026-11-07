@@ -1,0 +1,8 @@
+NAME="arpack"
+VERSION="3.9.1"
+URL="https://github.com/opencollab/arpack-ng/archive/refs/tags/3.9.1.tar.gz"
+DESC="ARPACK-ng: large-scale eigenvalue problems via implicitly restarted Arnoldi"
+HOMEPAGE="https://github.com/opencollab/arpack-ng"
+DEPS="openblas"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DICB=ON"

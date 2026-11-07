@@ -1,0 +1,11 @@
+# build products
+out/
+src/
+build/
+logs/
+*.bottle.tar.gz
+*.rb.bak
+
+# editors / OS
+.DS_Store
+*.swp

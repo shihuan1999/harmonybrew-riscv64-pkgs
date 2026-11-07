@@ -1,0 +1,8 @@
+NAME="expat"
+VERSION="2.6.4"
+URL="https://github.com/libexpat/libexpat/releases/download/R_2_6_4/expat-2.6.4.tar.gz"
+SHA256="fd03b7172b3bd7427a3e7a812063f74754f24542429b634e0db6511b53fb2278"
+DESC="XML parser (HDF5, config files)"
+HOMEPAGE="https://libexpat.github.io/"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--without-xmlwf --without-docbook"

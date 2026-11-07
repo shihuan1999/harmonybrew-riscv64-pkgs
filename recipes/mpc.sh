@@ -1,0 +1,8 @@
+NAME="mpc"
+VERSION="1.3.1"
+URL="https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz"
+DESC="Complex numbers with arbitrary precision"
+HOMEPAGE="https://www.multiprecision.org/mpc/"
+DEPS="mpfr"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--disable-shared --enable-static"

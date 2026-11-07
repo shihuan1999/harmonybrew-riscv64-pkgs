@@ -1,0 +1,8 @@
+NAME="kissfft"
+VERSION="131.1.0"
+URL="https://github.com/mborgerding/kissfft/archive/refs/tags/131.1.0.tar.gz"
+SHA256="__SHA__"
+DESC="KISS FFT: simple fixed/float FFT library"
+HOMEPAGE="https://github.com/mborgerding/kissfft"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DKISSFFT_STATIC=ON -DKISSFFT_SHARED=OFF -DKISSFFT_TEST=OFF -DKISSFFT_TOOLS=OFF"

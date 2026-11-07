@@ -1,0 +1,6 @@
+NAME="snappy"
+VERSION="1.2.1"
+URL="https"
+DESC="//github.com/google/snappy/archive/refs/tags/1.2.1.tar.gz"
+HOMEPAGE="https://example.org/snappy"
+BUILD_METHOD="Snappy fast compressor:cmake"

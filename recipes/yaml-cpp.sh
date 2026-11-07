@@ -1,0 +1,6 @@
+NAME="yaml-cpp"
+VERSION="0.8.0"
+URL="https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz"
+DESC="yaml-cpp: YAML parser/emitter for C++ (experiment configs)"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOOLS=OFF -DBUILD_SHARED_LIBS=OFF"

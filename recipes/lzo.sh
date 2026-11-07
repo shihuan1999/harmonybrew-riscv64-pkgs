@@ -1,0 +1,6 @@
+NAME="lzo"
+VERSION="2.10"
+URL="https"
+DESC="//www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz"
+HOMEPAGE="https://example.org/lzo"
+BUILD_METHOD="LZO real-time compression:autoconf"

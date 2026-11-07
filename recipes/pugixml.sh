@@ -1,0 +1,7 @@
+NAME="pugixml"
+VERSION="1.14"
+URL="https://github.com/zeux/pugixml/archive/refs/tags/v1.14.tar.gz"
+DESC="pugixml: lightweight XML parser (mesh/model formats)"
+HOMEPAGE="https://pugixml.org/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DPUGIXML_BUILD_TESTS=OFF"

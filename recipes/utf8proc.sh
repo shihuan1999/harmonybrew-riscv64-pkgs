@@ -1,0 +1,7 @@
+NAME="utf8proc"
+VERSION="2.9.0"
+URL="https://github.com/JuliaStrings/utf8proc/archive/refs/tags/v2.9.0.tar.gz"
+DESC="utf8proc: UTF-8 string processing (scientific text data)"
+HOMEPAGE="https://juliastrings.github.io/utf8proc/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DUTF8PROC_INSTALL=ON"

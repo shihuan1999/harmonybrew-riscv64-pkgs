@@ -1,0 +1,6 @@
+NAME="plplot"
+VERSION="5.15.0"
+URL="https://downloads.sourceforge.net/project/plplot/plplot/5.15.0%20Source/plplot-5.15.0.tar.gz"
+DESC="PLplot: scientific plotting library"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DDEFAULT_NO_BINDINGS=ON -DENABLE_tcldtk=OFF -DENABLE_python=OFF -DENABLE_java=OFF -DPLD_png=OFF -DPLD_pdf=OFF"

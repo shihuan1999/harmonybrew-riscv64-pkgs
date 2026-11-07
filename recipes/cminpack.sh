@@ -1,0 +1,7 @@
+NAME="cminpack"
+VERSION="1.3.8"
+URL="https://github.com/devernay/cminpack/archive/refs/tags/v1.3.8.tar.gz"
+DESC="Nonlinear equations and least squares solver (MINPACK in C)"
+HOMEPAGE="http://devernay.free.fr/hacks/cminpack/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF -DCMINPACK_NO_DLL=ON"

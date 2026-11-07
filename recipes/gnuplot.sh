@@ -1,0 +1,6 @@
+NAME="gnuplot"
+VERSION="6.0.2"
+URL="https://sourceforge.net/projects/gnuplot/files/gnuplot/6.0.2/gnuplot-6.0.2.tar.gz/download"
+DESC="gnuplot: command-line driven plotting utility"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--without-x --disable-wxwidgets --without-cairo --without-lua --without-tutorial"

@@ -1,0 +1,6 @@
+NAME="lzokay"
+VERSION="1.0"
+URL="https"
+DESC="//github.com/google/lz4/archive/refs/tags/v1.10.0.tar.gz"
+HOMEPAGE="https://example.org/lzokay"
+BUILD_METHOD="LZ4 alias:cmake"

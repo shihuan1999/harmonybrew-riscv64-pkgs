@@ -1,0 +1,7 @@
+NAME="rapidjson"
+VERSION="1.1.0"
+URL="https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.tar.gz"
+DESC="RapidJSON: fast header-only JSON parser (experiment results)"
+HOMEPAGE="https://rapidjson.org/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DRAPIDJSON_BUILD_TESTS=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_DOC=OFF"

@@ -1,0 +1,7 @@
+NAME="double-conversion"
+VERSION="3.3.0"
+URL="https://github.com/google/double-conversion/archive/refs/tags/v3.3.0.tar.gz"
+DESC="Double-conversion: fast binary<->decimal float conversion"
+HOMEPAGE="https://github.com/google/double-conversion"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF"

@@ -1,0 +1,8 @@
+NAME="gsl"
+VERSION="2.8"
+URL="https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz"
+SHA256="6a99eeed15632c6354895b1dd542ed5a855c0f15d9ad1326c6fe2b2c9e423190"
+DESC="GNU Scientific Library: numerical routines for scientific computing"
+HOMEPAGE="https://www.gnu.org/software/gsl/"
+BUILD_METHOD="autoconf"
+CONFIGURE_ARGS="--disable-shared --enable-static"

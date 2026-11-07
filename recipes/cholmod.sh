@@ -1,0 +1,7 @@
+NAME="cholmod"
+VERSION="5.3.0"
+URL="https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.8.3.tar.gz"
+DESC="CHOLMOD: sparse Cholesky factorization (from SuiteSparse)"
+DEPS="openblas"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF"

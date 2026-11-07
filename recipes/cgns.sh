@@ -1,0 +1,8 @@
+NAME="cgns"
+VERSION="4.4.0"
+URL="https://github.com/CGNS/CGNS/archive/refs/tags/v4.4.0.tar.gz"
+DESC="CGNS: CFD General Notation System data format"
+HOMEPAGE="https://cgns.github.io/"
+DEPS="hdf5"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DCGNS_BUILD_TESTING=OFF -DCGNS_BUILD_CGNSTOOLS=OFF -DCGNS_ENABLE_HDF5=ON -DCGNS_ENABLE_FORTRAN=OFF"

@@ -1,0 +1,7 @@
+NAME="hdf4"
+VERSION="4.3.0"
+URL="https://github.com/HDFGroup/hdf4/archive/refs/tags/hdf-4.3.0.tar.gz"
+DESC="HDF4: legacy hierarchical data format (satellite/EOS data)"
+DEPS="zlib"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DHDF4_BUILD_TOOLS=OFF"

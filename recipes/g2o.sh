@@ -1,0 +1,7 @@
+NAME="g2o"
+VERSION="20241228"
+URL="https://github.com/RainerKuemmerle/g2o/archive/refs/heads/master.tar.gz"
+DESC="g2o: graph optimization framework (SLAM, bundle adjustment)"
+DEPS="eigen"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_UNITTESTS=OFF -DBUILD_APPS=OFF -DG2O_USE_OPENGL=OFF"

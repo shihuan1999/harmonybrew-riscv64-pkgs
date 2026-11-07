@@ -1,0 +1,8 @@
+NAME="cereal"
+VERSION="1.3.2"
+URL="https://github.com/USCiLab/cereal/archive/refs/tags/v1.3.2.tar.gz"
+SHA256="16a7ad9b31ba5880dac55d62b5d6f243c3ebc8d46a3514149e56b5e7ea81f85f"
+DESC="C++11 serialization library for scientific/ML data structures"
+HOMEPAGE="https://uscilab.github.io/cereal/"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DJUST_INSTALL_CEREAL=ON -DBUILD_TESTING=OFF"

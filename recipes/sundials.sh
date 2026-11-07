@@ -1,0 +1,6 @@
+NAME="sundials"
+VERSION="7.1.1"
+URL="https://github.com/LLNL/sundials/archive/refs/tags/v7.1.1.tar.gz"
+DESC="SUNDIALS: ODE/DAE solvers and nonlinear solvers (CVODE, IDA, KINSOL)"
+BUILD_METHOD="cmake"
+CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DEXAMPLES_ENABLE_C=OFF -DEXAMPLES_ENABLE_CXX=OFF"

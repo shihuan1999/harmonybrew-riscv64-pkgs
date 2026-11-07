@@ -1,0 +1,6 @@
+NAME="lzma"
+VERSION="5.6.3"
+URL="https"
+DESC="//github.com/tukaani-project/xz/archive/refs/tags/v5.6.3.tar.gz"
+HOMEPAGE="https://example.org/lzma"
+BUILD_METHOD="XZ Utils alias build:cmake"
