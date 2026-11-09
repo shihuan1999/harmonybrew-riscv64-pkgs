@@ -22,7 +22,11 @@
 # Usage: hbrew-enable-bridge [--disable]
 
 P=/data/harmonybrew
-FARM="$P/var/usrlocal/bin"
+# The bridge points at the FARM ROOT, not at its bin/ subdirectory:
+# PATH already appends /bin to this entry, so /usr/local must resolve to
+# <prefix>/var/usrlocal and the commands live in <prefix>/var/usrlocal/bin.
+BRIDGE_ROOT="$P/var/usrlocal"
+FARM="$BRIDGE_ROOT/bin"
 BRIDGE=/usr/local
 
 log() { echo "$(date '+%m-%d %H:%M:%S') [enable-bridge] $*" >> "$P/var/log/hbrew-farm.log"; }
@@ -51,8 +55,8 @@ mkdir -p "$FARM" 2>/dev/null
 
 if [ -L "$BRIDGE" ]; then
     cur="$(readlink "$BRIDGE")"
-    if [ "$cur" = "$FARM" ]; then
-        echo "bridge already in place: $BRIDGE -> $FARM ($(ls "$FARM" 2>/dev/null | wc -l) commands)"
+    if [ "$cur" = "$BRIDGE_ROOT" ]; then
+        echo "bridge already in place: $BRIDGE -> $BRIDGE_ROOT ($(ls "$FARM" 2>/dev/null | wc -l) commands)"
         exit 0
     fi
     echo "WARN: $BRIDGE is a symlink to $cur, leaving it alone" >&2
@@ -68,13 +72,13 @@ if ! mount -o remount,rw / 2>/dev/null; then
     echo "FAILED: cannot remount / rw (are you root?)" >&2
     exit 1
 fi
-ln -s "$FARM" "$BRIDGE"
+ln -s "$BRIDGE_ROOT" "$BRIDGE"
 sync
 mount -o remount,ro / 2>/dev/null
 
 if [ -L "$BRIDGE" ]; then
-    log "bridge created: $BRIDGE -> $FARM"
-    echo "bridge created: $BRIDGE -> $FARM"
+    log "bridge created: $BRIDGE -> $BRIDGE_ROOT"
+    echo "bridge created: $BRIDGE -> $BRIDGE_ROOT"
     echo "commands now on PATH: $(ls "$FARM" 2>/dev/null | wc -l)"
     echo
     echo "verify:  which jq && jq --version"
