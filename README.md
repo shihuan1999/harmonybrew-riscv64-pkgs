@@ -128,25 +128,57 @@ python3 scripts/elf_rpath.py --check bin/jq /data/harmonybrew
 
 ## 设备端零步骤安装
 
-把 `device/` 下的脚本装到设备后，`brew install` 的东西立即可用：
+设备端只做一件事：把 `/usr/local` 指向 `/data` 里的命令农场（一次性，运行期）。
 
 ```bash
-# 上机部署（一次性）
-hdc file send device/hbrew-systemlink /data/harmonybrew/sbin/
-hdc file send device/brewboot          /data/harmonybrew/sbin/
-hdc file send device/hbrew-farm-watch  /data/harmonybrew/sbin/
-hdc shell 'chmod 755 /data/harmonybrew/sbin/hbrew-systemlink \
-                     /data/harmonybrew/sbin/brewboot \
-                     /data/harmonybrew/sbin/hbrew-farm-watch'
-hdc shell /data/harmonybrew/sbin/brewboot      # 立即生效，之后每次开机自动
+# 1) 推送脚本
+hdc file send device/hbrew-farm-build    /data/harmonybrew/sbin/
+hdc file send device/hbrew-enable-bridge /data/harmonybrew/sbin/
+hdc file send device/hbrew-farm-watch    /data/harmonybrew/sbin/
+hdc shell 'chmod 755 /data/harmonybrew/sbin/hbrew-*; 
+           sed -i "s/$//" /data/harmonybrew/sbin/hbrew-*'
+
+# 2) 建立桥接（创建 /usr/local -> /data/harmonybrew/var/usrlocal）
+hdc shell /data/harmonybrew/sbin/hbrew-enable-bridge
+
+# 3) 让后续安装自动同步（可选）
+hdc shell 'setsid /data/harmonybrew/sbin/hbrew-farm-watch </dev/null >/dev/null 2>&1 &'
 ```
 
 之后：
 
 ```bash
-brew install tree && tree --version      # 立刻可用
+brew install tree && tree --version      # 立刻可用（/usr/local/bin 在 PATH 第一位）
 brew uninstall tree && which tree        # 立刻消失
+ls --version                             # 仍是 toybox，系统命令没被劫持
 ```
+
+### ⚠️ 唯一红线：不要在开机流程里碰 /system
+
+`hbrew-enable-bridge` 会 remount `/` 一次（创建那个符号链接）。**只能在对
+已完全启动的设备执行**。任何在 boot 阶段（init job、hbrew-init、brewboot）
+做 `remount,rw /` 或写 `/system` 的行为都会让设备永远停在开机动画：
+
+```
+开机早期 remount,rw / 并写入 /system
+  → /mnt 的 tmpfs superblock 被降级为只读
+  → StorageDaemon 建不出 /mnt/sandbox
+  → 应用无法 fork，bootevent.boot.completed 永不触发
+  → bootanimation 永不退出（屏幕亮着，但没有任何画面）
+```
+
+这个结论在真机上复现了两次，详见
+[docs/WHY-APT-WORKS-BREW-BROKE.md §7](docs/WHY-APT-WORKS-BREW-BROKE.md)。
+
+### 验收：必须截屏，不能看窗口数
+
+```bash
+hdc shell 'snapshot_display -f /data/local/tmp/s.jpeg'
+hdc file recv /data/local/tmp/s.jpeg ./s.jpeg     # 然后看图
+```
+
+卡死时截图是 **64 KB 纯黑**；正常时是 **166 KB 真实桌面**。
+`total window num: 3` 曾经骗过我一次——窗口对象被创建不等于画面被渲染。
 
 ## 目录结构
 
@@ -158,10 +190,10 @@ scripts/
   elf_rpath.py       纯 Python ELF RPATH 读写
 recipes/             每个包一个 .sh
 device/              设备端零步骤安装组件
-  hbrew-systemlink   逐个文件发布命令到 /system/bin（系统优先）
-  brewboot           开机自举（清危险残留 + 发布 + 起 watcher）
-  hbrew-farm-watch   监视 kegs 变化并重新发布
-  hbrew-fix-rpath    设备端 rpath 体检/修复
+  hbrew-enable-bridge  一次性创建 /usr/local -> /data 农场链接（运行期，非开机）
+  hbrew-farm-build     生成/刷新命令农场（只写 /data，系统同名一律跳过）
+  hbrew-farm-watch     kegs 变化时刷新农场（只写 /data，绝不 remount）
+  hbrew-fix-rpath      审计 keg 的 RPATH（修复在构建侧做）
 docs/
   WHY-APT-WORKS-BREW-BROKE.md   为什么 apt 行、brew 那样做会卡开机动画
 out/                 构建产物（不入库）

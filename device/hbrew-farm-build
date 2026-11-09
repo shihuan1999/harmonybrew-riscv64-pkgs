@@ -1,0 +1,88 @@
+#!/system/bin/sh
+# hbrew-farm-build — build the curated command farm under /data.
+#
+# DESIGN CONSTRAINTS (learned from two hard boot failures)
+#   * Nothing here may touch /system or /vendor, and nothing may remount
+#     anything. This script only writes inside /data.
+#   * The farm is reachable through the rootfs symlink
+#         /usr/local -> /data/harmonybrew/var/usrlocal
+#     which is created ONCE, at runtime, by an operator (not at boot).
+#   * /usr/local/bin sits FIRST in PATH, so the farm must never contain a
+#     name the image already provides. Otherwise a brewed copy shadows a
+#     system tool — busybox alone would take over ls/cp/cat/ps/df/mount and
+#     break the boot chain. Hence the hard filter below.
+#
+# Filter: publish a keg binary only if
+#   1. /system/bin/<name> does not exist, AND
+#   2. the name is not on the boot-chain deny list, AND
+#   3. the keg is not one of the multi-applet bundles (busybox/coreutils).
+#
+# Usage: hbrew-farm-build [--verbose]
+
+P=/data/harmonybrew
+SRC="$P/bin"
+FARM="$P/var/usrlocal/bin"   # /usr/local -> var/usrlocal, so PATH entry is usrlocal/bin
+LOG="$P/var/log/hbrew-farm.log"
+
+VERBOSE=0
+[ "${1:-}" = "--verbose" ] && VERBOSE=1
+say() { [ "$VERBOSE" = 1 ] && echo "$*"; }
+
+# Boot-chain critical tools: never publish even if the image lacks the name.
+# These are what init jobs, appspawn and storage_daemon rely on.
+deny() {
+  case "$1" in
+    brew|brew-*|hbrew-*|python-env.sh) return 0 ;;
+    sh|ash|bash|env|ls|ps|cat|cp|mv|rm|ln|mkdir|rmdir|chmod|chown|chgrp) return 0 ;;
+    mount|umount|dd|sync|kill|killall|sleep|date|df|du|stat|readlink|realpath) return 0 ;;
+    pwd|echo|printf|test|expr|true|false|id|whoami|uname|hostname) return 0 ;;
+    ifconfig|route|ping|netstat|tar|gzip|gunzip|sed|grep|awk|find|xargs) return 0 ;;
+    sort|uniq|wc|head|tail|cut|tr|tee|touch|mktemp|mknod|dmesg|free|uptime) return 0 ;;
+    top|nohup|time|which|wget|vi|ed|less|more|start|stop|reboot|poweroff) return 0 ;;
+  esac
+  return 1
+}
+
+# Multi-applet bundles must never be published wholesale.
+bundle_keg() {
+  case "$1" in
+    "$P"/Cellar/busybox*|"$P"/Cellar/coreutils*) return 0 ;;
+  esac
+  return 1
+}
+
+mkdir -p "$FARM" 2>/dev/null || exit 1
+
+added=0; skipped=0
+manifest="$P/var/usrlocal.manifest"
+: > "$manifest" 2>/dev/null
+
+# 1) drop links whose keg is gone or which are no longer allowed
+for l in "$FARM"/*; do
+  [ -L "$l" ] || continue
+  b="${l##*/}"
+  if [ ! -e "$l" ] || deny "$b" || [ -e "/system/bin/$b" ]; then
+    rm -f "$l" 2>/dev/null
+    say "drop $b"
+  fi
+done
+
+# 2) add every eligible keg binary
+for f in "$SRC"/*; do
+  [ -e "$f" ] || continue
+  b="${f##*/}"
+  deny "$b" && continue
+  [ -e "/system/bin/$b" ] && continue          # system wins, always
+  bundle_keg "$f" && continue
+  [ -L "$FARM/$b" ] && continue                 # already published
+  if ln -s "$f" "$FARM/$b" 2>/dev/null; then
+    echo "$b -> $f" >> "$manifest"
+    say "add $b"
+    added=$((added + 1))
+  fi
+done
+
+count=$(ls "$FARM" 2>/dev/null | wc -l)
+echo "$(date '+%m-%d %H:%M:%S') [farm] added=$added total=$count" >> "$LOG" 2>/dev/null
+[ "$VERBOSE" = 1 ] && echo "hbrew-farm-build: added=$added total=$count"
+exit 0

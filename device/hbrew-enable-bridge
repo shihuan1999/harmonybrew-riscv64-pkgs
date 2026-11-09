@@ -1,0 +1,85 @@
+#!/system/bin/sh
+# hbrew-enable-bridge — one-shot, RUN-TIME-ONLY creation of the PATH bridge.
+#
+# Creates exactly one object on the read-only rootfs and nothing else:
+#
+#     /usr/local -> /data/harmonybrew/var/usrlocal
+#
+# Why the bridge is a rootfs symlink and not a mount:
+#   * a symlink survives reboots on its own — no boot-time action is needed;
+#   * /usr/local/bin is already FIRST in PATH on this image, so every brewed
+#     command becomes usable with zero further setup;
+#   * the farm it points at lives in /data, so installing or removing a keg
+#     only rewrites /data — /system is never touched again.
+#
+# *** DO NOT RUN THIS FROM BOOT ***
+#   Remounting / rw during early boot breaks the image's boot validation:
+#   /mnt's tmpfs gets demoted to read-only, StorageDaemon cannot create
+#   /mnt/sandbox, bootevent.boot.completed never fires and the device sits on
+#   the boot animation forever. Verified twice. This script is meant for an
+#   interactive shell on a fully booted device.
+#
+# Usage: hbrew-enable-bridge [--disable]
+
+P=/data/harmonybrew
+FARM="$P/var/usrlocal/bin"
+BRIDGE=/usr/local
+
+log() { echo "$(date '+%m-%d %H:%M:%S') [enable-bridge] $*" >> "$P/var/log/hbrew-farm.log"; }
+
+if [ "${1:-}" = "--disable" ]; then
+    if [ -L "$BRIDGE" ]; then
+        if mount -o remount,rw / 2>/dev/null; then
+            rm -f "$BRIDGE"
+            sync
+            mount -o remount,ro / 2>/dev/null
+            log "bridge removed"
+            echo "bridge removed: $BRIDGE"
+        else
+            echo "FAILED: cannot remount / rw" >&2
+            exit 1
+        fi
+    else
+        echo "no bridge present"
+    fi
+    exit 0
+fi
+
+# make sure there is a farm to point at
+mkdir -p "$FARM" 2>/dev/null
+"$P/sbin/hbrew-farm-build" >/dev/null 2>&1
+
+if [ -L "$BRIDGE" ]; then
+    cur="$(readlink "$BRIDGE")"
+    if [ "$cur" = "$FARM" ]; then
+        echo "bridge already in place: $BRIDGE -> $FARM ($(ls "$FARM" 2>/dev/null | wc -l) commands)"
+        exit 0
+    fi
+    echo "WARN: $BRIDGE is a symlink to $cur, leaving it alone" >&2
+    exit 1
+fi
+
+if [ -e "$BRIDGE" ] && [ ! -L "$BRIDGE" ]; then
+    echo "WARN: $BRIDGE exists as a real directory, refusing to replace it" >&2
+    exit 1
+fi
+
+if ! mount -o remount,rw / 2>/dev/null; then
+    echo "FAILED: cannot remount / rw (are you root?)" >&2
+    exit 1
+fi
+ln -s "$FARM" "$BRIDGE"
+sync
+mount -o remount,ro / 2>/dev/null
+
+if [ -L "$BRIDGE" ]; then
+    log "bridge created: $BRIDGE -> $FARM"
+    echo "bridge created: $BRIDGE -> $FARM"
+    echo "commands now on PATH: $(ls "$FARM" 2>/dev/null | wc -l)"
+    echo
+    echo "verify:  which jq && jq --version"
+    echo "system:  ls --version          # must still be toybox"
+else
+    echo "FAILED: link was not created" >&2
+    exit 1
+fi

@@ -226,3 +226,80 @@ jq-1.8.1
 6. **每个 bottle 发布前必须校验 RPATH**：
    `python3 elf_rpath.py --check <bin> /data/harmonybrew`
    输出 BAD-RPATH / NO-RPATH 的包不允许发布。
+
+---
+
+## 七、补充（2026-11-09）：卡开机动画的真正元凶是"开机早期 remount /"
+
+前面 §1–§6 的结论只解释了一半问题。真机上反复复现后，最终定位到一条更硬的规则：
+
+> **绝不能在开机流程中 remount `/` 或写 `/system`。**
+
+### 7.1 两次误判的教训
+
+第一次"修复"后我用 `hidumper -s WindowManagerService | grep 'total window num'`
+看到 3 个窗口，就断定桌面正常。**这是错的**：
+
+| 判据 | 卡死时 | 真实正常时 |
+|---|---|---|
+| `total window num` | 3 | 11 |
+| `param get bootevent.boot.completed` | **errNum 106（从未设置）** | **true** |
+| `ps | grep bootanimation` | **一直在跑（挂了 37 小时）** | **已退出** |
+| `/mnt` superblock | **ro** | **rw** |
+| `snapshot_display` 截图 | 64 KB，**全像素 (0,0,0)** | 166 KB，真实桌面 |
+
+窗口对象被创建 ≠ 画面被渲染。**唯一可信的验收方式是截屏。**
+
+### 7.2 因果链
+
+```
+开机早期（post-fs-data 之后）执行 mount -o remount,rw / 并写入 /system
+        ↓
+镜像的启动校验判定 system 分区被改写
+        ↓
+/mnt 的 tmpfs superblock 被降级为只读（mountinfo 显示 mount=rw / super=ro）
+        ↓
+StorageDaemon 无法 mkdir /mnt/sandbox（errno=30 EROFS）
+        ↓
+AppSpawn 无法建立任何沙箱 → 没有应用能 fork
+        ↓
+bootevent.boot.completed 永不触发
+        ↓
+bootanimation 永不退出 → 永远停在开机动画（屏幕点亮但无画面）
+```
+
+**同样的 remount 在系统完全启动后执行是无害的**（我在此之前多次运行期
+remount 都正常）。所以问题不是"写 /system"这个动作，而是**时机**。
+
+### 7.3 正确方案：桥接用持久符号链接，开机零动作
+
+```
+/usr/local -> /data/harmonybrew/var/usrlocal      # rootfs 符号链接，一次性创建
+                       └── bin/<cmd> -> keg 里的真实文件
+```
+
+- `/usr/local/bin` 本来就在 PATH **第一位**，所以装完即用；
+- 链接持久保存在 rootfs，**重启后自动生效，开机流程完全不需要动作**；
+- 农场内容住在 `/data`，安装/卸载只重写 `/data`，**永不触碰 /system**；
+- 农场严格过滤：**`/system/bin` 已存在的名字一律不发布**，并额外硬编码
+  排除启动链命令（`sh/mount/ls/cp/cat/chmod/...`）与 busybox/coreutils
+  这类多 applet 包 —— 否则又会重演 §1 的劫持。
+
+### 7.4 验收结果（真机，重启后）
+
+```
+bootevent.boot.completed = true
+bootanimation            = 已退出
+/mnt                     = rw
+ls --version             = toybox 0.8.12      ← 系统命令未被劫持
+jq --version             = jq-1.8.1           ← 零步骤可用
+gsl-randist              = 正常               ← 零步骤可用
+snapshot_display         = 166 KB 真实桌面（17 图标 + Dock + 状态栏 + 导航栏）
+```
+
+### 7.5 规则补充（第 7、8 条红线）
+
+7. **开机流程中禁止 remount `/`、`/system`、`/vendor`，禁止写这些分区。**
+   需要在系统路径放东西，就在运行期一次性做好，让结果持久化。
+8. **验收桌面必须截屏**：`snapshot_display` + 人工/视觉确认。
+   `window num`、`ps`、`ls` 能跑通都不能证明界面已经出来。

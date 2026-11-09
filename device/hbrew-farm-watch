@@ -1,46 +1,46 @@
 #!/system/bin/sh
-# hbrew-farm-watch v6 — keep brewed COMMANDS visible on /system/bin.
+# hbrew-farm-watch v6 — keep the /data farm in sync with installed kegs.
 #
-# Publication model: individual symlinks, commands only.
-#   /system/bin/<cmd> -> /data/harmonybrew/bin/<cmd>
+# HARD CONSTRAINT: this watcher never remounts anything and never writes
+# outside /data. Doing either during boot breaks the image's boot validation
+# (see docs/WHY-APT-WORKS-BREW-BROKE.md §7): /mnt's tmpfs is demoted to
+# read-only, StorageDaemon cannot build /mnt/sandbox, bootevent.boot.completed
+# never fires, and the device stays on the boot animation forever.
 #
-# Libraries are NEVER published (see hbrew-systemlink v2 header): a brewed
-# lib on /system/lib64 shadows the image's own copies for every process and
-# hangs the device on the boot animation.
+# The PATH bridge it feeds is a persistent rootfs symlink
+#   /usr/local -> /data/harmonybrew/var/usrlocal
+# created once at runtime by hbrew-enable-bridge. Nothing here recreates it.
 #
-# Loop: regenerate farms, then republish only when the keg bin listing
-# changed (avoids a remount-rw cycle every second).
+# Usage: hbrew-farm-watch           (foreground; start with setsid/nohup)
+#        hbrew-farm-watch --once    (single pass; use from brew hooks)
 
 P=/data/harmonybrew
-SLEEP="$P/bin/busybox"
-[ -x "$SLEEP" ] || SLEEP=sleep
-STAMP="$P/var/systemlink/.last-bins"
+BIN="$P/bin"
+STAMP="$P/var/.farm-listing"
+CMD="$P/sbin/hbrew-farm-build"
 
-mkdir -p "$P/var/systemlink" 2>/dev/null
+listing() { ls "$BIN" 2>/dev/null; }
 
-listing() { ls "$P/bin" 2>/dev/null; }
-
-# one-shot cleanup of harmful leftovers from earlier versions
-if [ -e /usr/local/lib ] || [ -L /usr/local/lib ]; then
-  if mount -o remount,rw / 2>/dev/null; then
-    rm -rf /usr/local/lib && sync
-    mount -o remount,ro / 2>/dev/null
-  fi
+if [ "${1:-}" = "--once" ]; then
+    "$CMD" >/dev/null 2>&1
+    listing > "$STAMP" 2>/dev/null
+    exit 0
 fi
 
+SLEEP="$BIN/busybox"
+[ -x "$SLEEP" ] || SLEEP=sleep
+
+mkdir -p "$P/var" 2>/dev/null
 listing > "$STAMP" 2>/dev/null
 
 while :; do
-  "$P/sbin/hbrew-farm" >/dev/null 2>&1
-  cur="$P/var/systemlink/.cur-bins"
-  listing > "$cur" 2>/dev/null
-  if ! cmp -s "$cur" "$STAMP" 2>/dev/null; then
-    if mount -o remount,rw / 2>/dev/null; then
-      "$P/sbin/hbrew-systemlink" >/dev/null 2>&1
-      sync
-      mount -o remount,ro / 2>/dev/null
+    cur="$P/var/.farm-listing.cur"
+    listing > "$cur" 2>/dev/null
+    if ! cmp -s "$cur" "$STAMP" 2>/dev/null; then
+        # a keg was installed or removed: refresh the farm (/data writes only)
+        "$CMD" >/dev/null 2>&1
+        mv -f "$cur" "$STAMP" 2>/dev/null
     fi
-    mv -f "$cur" "$STAMP" 2>/dev/null
-  fi
-  "$SLEEP" sleep 1 >/dev/null 2>&1 || sleep 2
+    rm -f "$cur" 2>/dev/null
+    "$SLEEP" sleep 2 >/dev/null 2>&1 || sleep 3
 done
