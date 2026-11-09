@@ -303,3 +303,38 @@ snapshot_display         = 166 KB 真实桌面（17 图标 + Dock + 状态栏 + 
    需要在系统路径放东西，就在运行期一次性做好，让结果持久化。
 8. **验收桌面必须截屏**：`snapshot_display` + 人工/视觉确认。
    `window num`、`ps`、`ls` 能跑通都不能证明界面已经出来。
+
+---
+
+## 八、补充（2026-11-09）：`disabled: 1` 拦不住 init
+
+后面又栽了一次，原因很隐蔽：`hbrew-init` 在 `init.pico.cfg` 里是 `once` 服务，
+我给它的服务定义加了 `"disabled": 1`，以为这样它就不会在开机阶段运行了。
+
+**实际不会生效。** dmesg 实测：
+
+```
+[    4.882359] [pid=1][Init][INFO]ServiceStart started info hbrew-init(pid 1037)
+```
+
+开机第 4.9 秒 init 照样把它拉起来。于是我新加进 `hbrew-init` 的
+"创建 PATH 桥" 步骤（内部要 `mount -o remount,rw /`）又在开机早期执行了一次，
+`/mnt` 再次变只读，设备又卡在开机动画。
+
+### 结论
+
+- **不要指望 `disabled` 标志**。任何会被 init 作为服务启动的脚本，必须做到
+  "无论何时被调用都只写 /data"。
+- 需要 remount `/` 的一次性动作（例如创建 `/usr/local` 符号链接），放到
+  **用户态入口**里——本方案放在 `/system/bin/brew` 包装器：只有真正执行
+  `brew` 时才会跑，那时系统已完全启动。
+- 判断"是否已经启动完成"再执行也不可靠（早期 param 服务可能还没有该键），
+  把动作挪到用户态入口是最稳的。
+
+### 最终职责划分
+
+| 组件 | 运行时机 | 允许做的事 |
+|---|---|---|
+| `hbrew-init` | 每次开机（init 强制拉起）+ 首次 brew | 释放种子、生成 env、刷新农场、拉起 brewboot —— **仅 /data** |
+| `/system/bin/brew` | 用户执行 brew 时 | 必要时建 `/usr/local` 桥（remount /，此时安全） |
+| `hbrew-farm-build` / `-watch` | 开机 / brew 调用 / 后台 | 只写 `/data/harmonybrew/var/usrlocal` |
